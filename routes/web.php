@@ -22,17 +22,14 @@ use App\Http\Controllers\UsersController;
 |
 */
 
-
-Route::get('/', [UsersController::class, 'search']);
-
 Auth::routes();
 
-Route::controller(HomeController::class)->group(function () {
+Route::controller(HomeController::class)->middleware('auth')->group(function () {
     Route::get('home', 'index')->name('home');
     Route::get('profile', 'index')->name('profile');
 });
 
-Route::controller(FamilyActionsController::class)->group(function () {
+Route::controller(FamilyActionsController::class)->middleware('auth')->group(function () {
     Route::post('family-actions/{user}/set-father', 'setFather')->name('family-actions.set-father');
     Route::post('family-actions/{user}/set-mother', 'setMother')->name('family-actions.set-mother');
     Route::post('family-actions/{user}/add-child', 'addChild')->name('family-actions.add-child');
@@ -41,7 +38,13 @@ Route::controller(FamilyActionsController::class)->group(function () {
     Route::post('family-actions/{user}/set-parent', 'setParent')->name('family-actions.set-parent');
 });
 
-Route::controller(UsersController::class)->group(function () {
+Route::controller(ChangePasswordController::class)->middleware('auth')->group( function () {
+    Route::get('password/change', 'show')->name('password_change');
+    Route::post('password/change', 'update')->name('password_update');
+});
+
+Route::controller(UsersController::class)->middleware('auth')->group(function () {
+    Route::get('/', 'search')->name('users.search');
     Route::get('profile-search', 'search')->name('users.search');
     Route::get('users/{user}', 'show')->name('users.show');
     Route::get('users/{user}/edit', 'edit')->name('users.edit');
@@ -53,24 +56,21 @@ Route::controller(UsersController::class)->group(function () {
     Route::delete('users/{user}', 'destroy')->name('users.destroy');
 });
 
-Route::get('users/{user}/marriages', [UserMarriagesController::class, 'index'])->name('users.marriages');
+Route::get('users/{user}/marriages', [UserMarriagesController::class, 'index'])->middleware('auth')->name('users.marriages');
 
-Route::get('birthdays', [BirthdayController::class, 'index'])->name('birthdays.index');
+Route::get('birthdays', [BirthdayController::class, 'index'])->middleware('auth')->name('birthdays.index');
 
 /**
  * Couple/Marriages Routes
  */
-Route::controller(CouplesController::class)->group(function () {
+Route::controller(CouplesController::class)->middleware('auth')->group(function () {
     Route::get('couples/{couple}', 'show')->name('couples.show');
     Route::get('couples/{couple}/edit', 'edit')->name('couples.edit');
     Route::patch('couples/{couple}', 'update')->name('couples.update');
 });
 
 
-Route::controller(ChangePasswordController::class)->middleware('auth')->group( function () {
-    Route::get('password/change', 'show')->name('password_change');
-    Route::post('password/change', 'update')->name('password_update');
-});
+
 /**
  * Admin only routes
  */
